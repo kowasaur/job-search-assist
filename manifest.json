@@ -1,0 +1,12 @@
+{
+    "manifest_version": 3,
+    "name": "Job Search Assist",
+    "version": "0.0.1",
+    "author": "kowasaur",
+    "content_scripts": [
+        {
+            "matches": ["*://www.seek.com.au/*"],
+            "js": ["content.js"]
+        }
+    ]
+}
