@@ -1,8 +1,36 @@
+function createHide(listing, button_box_classes) {
+    const button_box = listing.querySelector(button_box_classes);
+    const hide = button_box.appendChild(button_box.lastChild.cloneNode(true));
+
+    const hide_span = [...hide.querySelectorAll("span")].at(-1);
+    hide_span.textContent = "Hide";
+    hide_span.style.color = "red";
+    return [hide, hide_span];
+}
+
+function setHideClick(click_element, id, element_to_remove) {
+    click_element.addEventListener("click", () => {
+        hidden_ids.add(id);
+        localStorage.setItem("hidden-ids", JSON.stringify([...hidden_ids]));
+        element_to_remove.remove();
+    });
+}
+
 const string_ids = localStorage.getItem("hidden-ids") ?? "[]";
 const hidden_ids = new Set(JSON.parse(string_ids));
 
 const listings = document.querySelectorAll("article");
 
+// On individual listing site (seek.com.au/job/[numbers])
+if (listings.length == 0) {
+    const id = [...document.querySelectorAll("link")].at(-1).href.split("/").at(-1);
+    const [hide] = createHide(document, "._14uh994ey .v8nw0725");
+
+    const hide_button = [...hide.querySelectorAll("button")].at(-1);
+    setHideClick(hide_button, id, hide_button);
+}
+
+// Search (seek.com.au/[search query])
 for (const listing of listings) {
     const id = listing.dataset.jobId;
     if (hidden_ids.has(id)) {
@@ -11,20 +39,8 @@ for (const listing of listings) {
         continue;
     }
 
-    const button_box = listing.querySelector("._14uh9946i ._14uh9947i");
-    const hide = button_box.firstChild.cloneNode(true);
-    button_box.appendChild(hide);
+    const [hide, hide_span] = createHide(listing, "._14uh9946i ._14uh9947i");
     hide.querySelector("svg").parentElement.remove();
-
-    const all_hide_spans = hide.querySelectorAll("span");
-    const hide_span = all_hide_spans[all_hide_spans.length - 1];
-    hide_span.textContent = "Hide";
     hide_span.style.marginLeft = "15px";
-    hide_span.style.color = "red";
-
-    hide_span.addEventListener("click", () => {
-        hidden_ids.add(id);
-        localStorage.setItem("hidden-ids", JSON.stringify([...hidden_ids]));
-        listing.remove();
-    });
+    setHideClick(hide_span, id, listing);
 }
